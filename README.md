@@ -18,7 +18,7 @@ This program has persisten check and action logs, so even in a case of shutdown 
 Also multithreading is used, so the order of the rules doesnt make any difference.<br/>
 
 *Examples*:<br/>
-Wait until a website ghas a specified text and trigger an action.<br/>
+Wait until a website has a specified text and trigger an action.<br/>
 
 Execute a python program at a specific time.<br/>
 
