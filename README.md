@@ -30,6 +30,8 @@ Wait until a specific file has been created and trigger an action.<br/>
 + There are endless possibilities, so be creative!<br/>
 
 
+This took me about 2 hours, so its not the most feature rich... But it does its job!
+
 
 
 Hereby no guarantees or responsibilities are taken.<br/>
