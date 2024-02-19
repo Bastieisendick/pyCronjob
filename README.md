@@ -6,7 +6,7 @@ Easy to setup and use task automation program.<br/>
 
 Define your own rules, checks and actions.<br/>
 
-To start, add your own rule in modules/rules.py<br/>
+To *start*, add your own rule in modules/rules.py<br/>
 You can just set the checkFunction to your own in modules/checks.py<br/>
 You can just set the actionFunction to your own in modules/actions.py<br/>
 You can set a checkCooldown indicating how long has to be waited until the check can be executed again. This is useful for webscraping checks and such for example, to limit request amounts.<br/>
@@ -30,7 +30,7 @@ Wait until a specific file has been created and trigger an action.<br/>
 + There are endless possibilities, so be creative!<br/>
 
 
-This took me about 2 hours, so its not the most feature rich... But it does its job!
+This took me about 2 hours, so its not the most feature rich... But it does its job!<br/>
 
 
 
