@@ -8,13 +8,20 @@ import datetime
 from modules import actions
 from modules import rules
 from modules import checks
+from modules import notifications
 
 
 
 RULECHECKINTERVAL = 0.1
 LOGSFOLDER = "logs"
-CHECKLOG_EXTENSION = ".check_log"
 ACTIONLOG_EXTENSION = ".action_log"
+CHECKLOG_EXTENSION = ".check_log"
+NOTIFICATIONLOG_EXTENSION = ".notification_log"
+NOTIFICATION_BOT_TOKEN = """YOUR NOTIFICATION (TELEGRAM) BOT TOKEN"""
+NOTIFICATION_TOTAL_RATELIMIT = {
+    "amount": 5,
+    "time": 30
+}
 
 
 
@@ -58,7 +65,8 @@ def mainloop():
         
 actionsObj = actions.actions()
 checksObj =  checks.checks()
-rulesObj = rules.rules(actionsObj, checksObj, LOGSFOLDER, CHECKLOG_EXTENSION, ACTIONLOG_EXTENSION)
+notificationsObj =  notifications.notifications(NOTIFICATION_BOT_TOKEN, NOTIFICATION_TOTAL_RATELIMIT)
+rulesObj = rules.rules(actionsObj, checksObj, notificationsObj, LOGSFOLDER, CHECKLOG_EXTENSION, ACTIONLOG_EXTENSION, NOTIFICATIONLOG_EXTENSION)
 
 
 mainloopWatcher = Thread(target=mainloop, args=())

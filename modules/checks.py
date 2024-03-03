@@ -16,9 +16,3 @@ class checks:
                 return True
 
             return False
-
-
-
-
-
-

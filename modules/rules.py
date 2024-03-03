@@ -6,14 +6,16 @@ import uuid
 
 class rules:
 
-    def __init__(self, actionsObj, checksObj, logsFolder, checkLogExtension, actionLogExtension):
+    def __init__(self, actionsObj, checksObj, notificationsObj, logsFolder, checkLogExtension, actionLogExtension, notificationLogExtension):
 
         self.actionsObj = actionsObj
         self.checksObj = checksObj
+        self.notificationsObj = notificationsObj
         self.checkThreads = {}
         self.logsFolder = logsFolder
         self.checkLogExtension = checkLogExtension
         self.actionLogExtension = actionLogExtension
+        self.notificationLogExtension = notificationLogExtension
 
         self.definedRules = self.generateRules()
 
@@ -25,9 +27,15 @@ class rules:
             "yourRule": {
                 "checkFunction" : self.checksObj.definitions.yourCheck,
                 "actionFunction": self.actionsObj.definitions.yourAction,
+                "notificationFunction": self.notificationsObj.definitions.yourNotification,
                 "checkCoolDown": 4,
                 "actionCoolDown": 30,
-                "parallel": False
+                "notificationCoolDown": 30,
+                "parallel": True,
+                "notificationActive": True,
+                "notificationParameters": {
+                    "chatId": "YOUR NOTIFICATION (TELEGRAM) BOT CHAT ID HERE"
+                }
             }
         }
 
@@ -55,7 +63,7 @@ class rules:
                     if(parallelExecution or ruleId not in self.checkThreads):
                         actionFunction = self.definedRules[ruleId]["actionFunction"]
 
-                        self.performAction(actionFunction, ruleId)                  
+                        self.performAction(actionFunction, ruleId)             
 
 
 
@@ -70,16 +78,30 @@ class rules:
 
     def performAction(self, actionFunction, ruleId):
 
-        uniqueThreadId = str(uuid.uuid4())
-
         def __actionProcedure():
+            
+            actionError = None
+            actionReturn = None
             try:
-                actionFunction()
+                actionReturn = actionFunction()
             except Exception as e:
                 print(f"Error during actionProcedure: {e}")
+                actionError = e
 
-            del self.checkThreads[ruleId][uniqueThreadId]
+            del self.checkThreads[ruleId][uniqueThreadId]               #removing the thread already, because the action has stopped and only notification related code will be executed from now on
 
+            isNotificationActivated = self.definedRules[ruleId]["notificationActive"]
+            notificationCoolDown = self.definedRules[ruleId]["notificationCoolDown"]
+            notificationHasCooledDown = self.hasCooledDown(ruleId, notificationCoolDown, self.notificationLogExtension)
+
+            if(isNotificationActivated and notificationHasCooledDown):
+                notificationFunction  = self.definedRules[ruleId]["notificationFunction"]
+                notificationParameters  = self.definedRules[ruleId]["notificationParameters"]
+
+                self.performNotification(notificationFunction, notificationParameters, ruleId, actionReturn, actionError)
+
+
+        uniqueThreadId = str(uuid.uuid4())
 
         actionThread = Thread(target=__actionProcedure, args=())
         actionThread.setDaemon(True)
@@ -101,7 +123,19 @@ class rules:
         self.writeLog(ruleId, self.actionLogExtension)
         
 
+    def performNotification(self, notificationFunction, notificationParameters, ruleId, actionReturn, actionError):
+        
+        def __notificationProcedure():
+            try:
+                notificationFunction(notificationParameters, actionReturn, actionError, ruleId)
+            except Exception as e:
+                print(f"Error during notificationProcedure: {e}")
 
+        notificationThread = Thread(target=__notificationProcedure, args=())
+        notificationThread.setDaemon(True)
+        notificationThread.start()
+
+        self.writeLog(ruleId, self.notificationLogExtension)
 
 
     def clean_checkThreads(self):
@@ -153,12 +187,3 @@ class rules:
         filePath = self.logsFolder + "/" + ruleId + fileExtension
         with open(filePath, "w") as file:
             file.write(str(time.time()))
-
-
-
-
-
-
-
-        
-
